@@ -1,28 +1,31 @@
-import './App.css';
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Login from './pages/Login'; // Make sure this path is correct
-import AddProduct from './pages/AddProduct'; // Adjust path as necessary
-import ViewProducts from './pages/ViewProducts'; // Adjust path as necessary
-import EditProduct from './pages/EditProduct'; // Adjust path as necessary
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'; // Import Navigate for redirection
+import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
+import './App.css'; // Custom CSS
+import Login from './pages/Login'; // Assuming Login is in pages folder
+import Dashboard from './pages/Dashboard'; // Assuming Dashboard is in pages folder
 
 const App = () => {
+    const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
+
     const handleLogin = () => {
-        // Implement your login logic here
-        console.log('User logged in');
+        setIsLoggedIn(true); // Update state when user logs in
     };
 
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<Login onLogin={handleLogin} />} />
-                <Route path="/products" element={<ViewProducts />} />
-                <Route path="/add" element={<AddProduct />} />
-                <Route path="/edit/:id" element={<EditProduct />} />
+                <Route 
+                    path="/" 
+                    element={isLoggedIn ? <Navigate to="/dashboard" /> : <Login onLogin={handleLogin} />} 
+                />
+                <Route 
+                    path="/dashboard" 
+                    element={isLoggedIn ? <Dashboard /> : <Navigate to="/" />} // Redirect to login if not logged in
+                />
             </Routes>
         </Router>
     );
-}
+};
 
 export default App;

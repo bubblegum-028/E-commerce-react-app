@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Button, Alert } from 'react-bootstrap';
+import { Form, Button, Alert, Container, Card } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import '../App.css'; 
 
@@ -18,7 +18,7 @@ const Login = ({ onLogin }) => {
         // Check credentials
         if (email === defaultEmail && password === defaultPassword) {
             onLogin(); // Call the login function passed as a prop
-            navigate('/products'); // Redirect to products page
+            navigate('/dashboard'); // Redirect to the dashboard page
         } else {
             setError('Invalid email or password. Please try again.');
         }
@@ -26,42 +26,52 @@ const Login = ({ onLogin }) => {
 
     return (
         <div className="login-container">
-            <Form onSubmit={handleSubmit}>
-                <h2>Login</h2>
-                {error && <Alert variant="danger">{error}</Alert>}
-                <Form.Group controlId="formBasicEmail">
-                    <Form.Label>Email address</Form.Label>
-                    <Form.Control
-                        type="email"
-                        placeholder="Enter email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                    <Form.Text className="text-muted">
-                        We'll never share your email with anyone else.
-                    </Form.Text>
-                </Form.Group>
+            <Container className="d-flex justify-content-center align-items-center vh-100">
+                <Card className="shadow-sm" style={{ width: '100%', maxWidth: '450px', height: '400px', padding: '20px' }}>
+                    <Card.Body>
+                        <h2 className="text-center">Login</h2>
+                        {error && <Alert variant="danger">{error}</Alert>}
+                        <Form onSubmit={handleSubmit}>
+                            <Form.Group controlId="formBasicEmail">
+                                <Form.Label>Email address</Form.Label>
+                                <Form.Control
+                                    type="email"
+                                    placeholder="Enter email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                />
+                                <Form.Text className="text-muted">
+                                    We'll never share your email with anyone else.
+                                </Form.Text>
+                            </Form.Group>
 
-                <Form.Group controlId="formBasicPassword">
-                    <Form.Label>Password</Form.Label>
-                    <Form.Control
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </Form.Group>
-                
-                <Form.Group controlId="formBasicCheckbox">
-                    <Form.Check type="checkbox" label="Check me out" />
-                </Form.Group>
+                            <Form.Group controlId="formBasicPassword">
+                                <Form.Label>Password</Form.Label>
+                                <Form.Control
+                                    type="password"
+                                    placeholder="Password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                            </Form.Group>
 
-                <Button variant="primary" type="submit">
-                    Submit
-                </Button>
-            </Form>
+                            <Form.Group controlId="formBasicCheckbox">
+                                <Form.Check type="checkbox" label="Remember me" />
+                            </Form.Group>
+
+                            <Button 
+                                variant="primary" 
+                                type="submit" 
+                                className="w-100 submit-button mb-3"
+                            >
+                                Submit
+                            </Button>
+                        </Form>
+                    </Card.Body>
+                </Card>
+            </Container>
         </div>
     );
 };
