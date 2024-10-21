@@ -1,15 +1,19 @@
+// src/App.js
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'; // Import Navigate for redirection
-import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
-import './App.css'; // Custom CSS
-import Login from './pages/Login'; // Assuming Login is in pages folder
-import Dashboard from './pages/Dashboard'; // Assuming Dashboard is in pages folder
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './App.css';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import ViewProducts from './pages/ViewProducts';
+import EditProduct from './pages/EditProduct';
 
 const App = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [products, setProducts] = useState([]);
 
     const handleLogin = () => {
-        setIsLoggedIn(true); // Update state when user logs in
+        setIsLoggedIn(true);
     };
 
     return (
@@ -21,7 +25,15 @@ const App = () => {
                 />
                 <Route 
                     path="/dashboard" 
-                    element={isLoggedIn ? <Dashboard /> : <Navigate to="/" />} // Redirect to login if not logged in
+                    element={isLoggedIn ? <Dashboard products={products} setProducts={setProducts} /> : <Navigate to="/" />} 
+                />
+                <Route 
+                    path="/products" 
+                    element={isLoggedIn ? <ViewProducts products={products} setProducts={setProducts} /> : <Navigate to="/" />} 
+                />
+                <Route 
+                    path="/edit/:id" 
+                    element={isLoggedIn ? <EditProduct products={products} setProducts={setProducts} /> : <Navigate to="/" />} 
                 />
             </Routes>
         </Router>
