@@ -23,6 +23,17 @@ export const fetchProducts = async (searchTerm = '', category = '') => {
     return await response.json();
 };
 
+// Fetch a single product by its ID
+export const fetchProductById = async (productId) => {
+    const response = await fetch(`${API_BASE_URL}/products/${productId}`);
+    
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    
+    return await response.json();
+};
+
 // Add a new product
 export const addProduct = async (productData) => {
     const response = await fetch(`${API_BASE_URL}/products`, {

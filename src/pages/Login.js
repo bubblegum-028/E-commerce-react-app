@@ -1,24 +1,28 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert, Container, Card } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-import '../App.css'; 
+import { useNavigate, useLocation } from 'react-router-dom';
+import '../App.css';
 
 const Login = ({ onLogin }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Default credentials
         const defaultEmail = 'admin@example.com';
         const defaultPassword = 'password';
 
-        // Check credentials
         if (email === defaultEmail && password === defaultPassword) {
-            onLogin(); // Call the login function passed as a prop
-            navigate('/dashboard'); // Redirect to the dashboard page
+            // Save login state to localStorage
+            localStorage.setItem('isLoggedIn', 'true');
+            onLogin();
+
+            // Redirect to the intended page or default to dashboard
+            const redirectPath = location.state?.from?.pathname || '/dashboard';
+            navigate(redirectPath);
         } else {
             setError('Invalid email or password. Please try again.');
         }
@@ -55,10 +59,6 @@ const Login = ({ onLogin }) => {
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                 />
-                            </Form.Group>
-
-                            <Form.Group controlId="formBasicCheckbox">
-                                <Form.Check type="checkbox" label="Remember me" />
                             </Form.Group>
 
                             <Button 

@@ -18,6 +18,8 @@ const Dashboard = () => {
     const [filteredProducts, setFilteredProducts] = useState([]); // State for filtered products
     const [selectedCategory, setSelectedCategory] = useState(''); // New state for selected category
     const [searchTerm, setSearchTerm] = useState(''); // State for search term
+    const [sortPrice, setSortPrice] = useState(''); // State for sorting by price
+    const [sortStock, setSortStock] = useState(''); // State for sorting by stock
 
     // Fetch products when component mounts
     useEffect(() => {
@@ -35,12 +37,26 @@ const Dashboard = () => {
 
     // Filter products based on search term and selected category
     useEffect(() => {
-        const filtered = products.filter(product =>
+        let filtered = products.filter(product =>
             product.description.toLowerCase().includes(searchTerm.toLowerCase()) &&
             (selectedCategory ? product.category === selectedCategory : true)
         );
+
+        // Sort based on selected criteria
+        if (sortPrice) {
+            filtered = filtered.sort((a, b) =>
+                sortPrice === 'asc' ? a.price - b.price : b.price - a.price
+            );
+        }
+
+        if (sortStock) {
+            filtered = filtered.sort((a, b) =>
+                sortStock === 'asc' ? a.quantity - b.quantity : b.quantity - a.quantity
+            );
+        }
+
         setFilteredProducts(filtered);
-    }, [searchTerm, selectedCategory, products]); // Re-run filter whenever these change
+    }, [searchTerm, selectedCategory, sortPrice, sortStock, products]); // Re-run filter whenever these change
 
     // Handle product search
     const handleSearch = (term) => {
@@ -50,6 +66,16 @@ const Dashboard = () => {
     // Handle category change
     const handleCategoryChange = (e) => {
         setSelectedCategory(e.target.value); // Set the selected category
+    };
+
+    // Handle sorting by price change
+    const handleSortPriceChange = (e) => {
+        setSortPrice(e.target.value); // Set the selected sort option for price
+    };
+
+    // Handle sorting by stock change
+    const handleSortStockChange = (e) => {
+        setSortStock(e.target.value); // Set the selected sort option for stock
     };
 
     const handleSubmit = async (e) => {
@@ -115,7 +141,7 @@ const Dashboard = () => {
 
     return (
         <Container className="mt-4">
-            <h1 className="dashboard-title mb-4">Dashboard</h1>
+            <h1 className="dashboard-title mb-4">Admin Dashboard</h1>
             <Searchbar onSearch={handleSearch} /> {/* Pass search term directly */}
 
             {/* Category Filter Dropdown */}
@@ -128,6 +154,25 @@ const Dashboard = () => {
                     <option value="Home Appliances">Home Appliances</option>
                     <option value="Books">Books</option>
                     <option value="Toys">Toys</option>
+                </Form.Select>
+            </Form.Group>
+
+            {/* Sorting Dropdowns */}
+            <Form.Group controlId="sortPrice" className="mb-4">
+                <Form.Label>Sort by Price</Form.Label>
+                <Form.Select value={sortPrice} onChange={handleSortPriceChange}>
+                    <option value="">Select Sorting</option>
+                    <option value="asc">Low to High</option>
+                    <option value="desc">High to Low</option>
+                </Form.Select>
+            </Form.Group>
+
+            <Form.Group controlId="sortStock" className="mb-4">
+                <Form.Label>Sort by Stock</Form.Label>
+                <Form.Select value={sortStock} onChange={handleSortStockChange}>
+                    <option value="">Select Sorting</option>
+                    <option value="asc">Low to High</option>
+                    <option value="desc">High to Low</option>
                 </Form.Select>
             </Form.Group>
 
