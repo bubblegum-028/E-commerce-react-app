@@ -1,82 +1,74 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Button, Modal, Form, Alert, Spinner } from 'react-bootstrap'; // Importing necessary components from React-Bootstrap
-import ProductCard from '../components/ProductCard'; // Custom component for displaying individual products
-import Searchbar from '../components/Searchbar'; // Custom component for search functionality
-import { fetchProducts, addProduct, updateProduct, deleteProduct } from '../api'; // Importing API functions for CRUD operations
-import { useNavigate } from 'react-router-dom'; // Hook for navigating between routes in the app
+import { Container, Button, Modal, Form, Alert, Spinner } from 'react-bootstrap';
+import ProductCard from '../components/ProductCard';
+import Searchbar from '../components/Searchbar';
+import { fetchProducts, addProduct, updateProduct, deleteProduct } from '../api';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-    // Array of available product categories for easy maintenance
     const categories = ["Electronics", "Clothing", "Home Appliances", "Books", "Toys"];
     
-    // State variables
-    const [products, setProducts] = useState([]); // Stores the list of all products
-    const [showModal, setShowModal] = useState(false); // Controls the visibility of the modal for adding/editing a product
-    const [barcode, setBarcode] = useState(''); // Stores the barcode input
-    const [description, setDescription] = useState(''); // Stores the product description
-    const [price, setPrice] = useState(''); // Stores the product price
-    const [quantity, setQuantity] = useState(''); // Stores the product quantity
-    const [category, setCategory] = useState(''); // Stores the selected product category
-    const [error, setError] = useState(''); // Stores any error messages
-    const [success, setSuccess] = useState(''); // Stores success messages
-    const [editingProductId, setEditingProductId] = useState(null); // Tracks the product being edited
-    const [filteredProducts, setFilteredProducts] = useState([]); // Stores the filtered list of products based on search/category
-    const [selectedCategory, setSelectedCategory] = useState(''); // Tracks the selected category for filtering
-    const [searchTerm, setSearchTerm] = useState(''); // Stores the search term input
-    const [loading, setLoading] = useState(false); // Tracks loading state
-    const navigate = useNavigate(); // Hook for navigation
+    const [products, setProducts] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [barcode, setBarcode] = useState('');
+    const [description, setDescription] = useState('');
+    const [price, setPrice] = useState('');
+    const [quantity, setQuantity] = useState('');
+    const [category, setCategory] = useState('');
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const [editingProductId, setEditingProductId] = useState(null);
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
-    // Fetch products from the API when the component mounts
     useEffect(() => {
         const loadProducts = async () => {
-            setLoading(true); // Start loading
+            setLoading(true);
             try {
-                const productsData = await fetchProducts(); // Fetching product data
-                setProducts(productsData); // Setting the fetched products
-                setFilteredProducts(productsData); // Initially displaying all products
+                const productsData = await fetchProducts();
+                setProducts(productsData);
+                setFilteredProducts(productsData);
             } catch (error) {
-                setError(error.message); // Handling error in case of failure
+                setError(error.message);
             } finally {
-                setLoading(false); // Stop loading
+                setLoading(false);
             }
         };
-        loadProducts(); // Call the function to fetch products
-    }, []); // Empty dependency array ensures this runs only once
+        loadProducts();
+    }, []);
 
-    // Filtering products based on search term and selected category
     useEffect(() => {
         const filtered = products.filter(product =>
             product.description.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            (selectedCategory ? product.category === selectedCategory : true) // Filter by selected category if provided
+            (selectedCategory ? product.category === selectedCategory : true)
         );
-        setFilteredProducts(filtered); // Update the filtered products state
-    }, [searchTerm, selectedCategory, products]); // Runs whenever the search term or selected category changes
+        setFilteredProducts(filtered);
+    }, [searchTerm, selectedCategory, products]);
 
-    // Handles the search input change
     const handleSearch = (term) => {
-        setSearchTerm(term); // Update search term
+        setSearchTerm(term);
     };
 
-    // Handles category filter change
     const handleCategoryChange = (e) => {
-        setSelectedCategory(e.target.value); // Update selected category
+        setSelectedCategory(e.target.value);
     };
 
-    // Handles the form submission for adding/editing products
     const handleSubmit = async (e) => {
-        e.preventDefault(); // Prevent default form submission
+        e.preventDefault();
         if (!barcode || !description || !price || !quantity || !category) {
-            setError('Please fill in all fields.'); // Display error if any field is empty
+            setError('Please fill in all fields.');
             return;
         }
 
-        const productData = { barcode, description, price, quantity, category }; // Product data object to send to the API
+        const productData = { barcode, description, price, quantity, category };
 
         try {
-            setLoading(true); // Start loading during API call
+            setLoading(true);
             if (editingProductId !== null) {
-                // If editing an existing product
-                await updateProduct(editingProductId, productData); // Call API to update the product
+                await updateProduct(editingProductId, productData);
                 setProducts((prevProducts) =>
                     prevProducts.map((product) =>
                         product.id === editingProductId ? { ...product, ...productData } : product
@@ -84,61 +76,56 @@ const Dashboard = () => {
                 );
                 setSuccess('Product updated successfully!');
             } else {
-                // If adding a new product
-                const newProduct = await addProduct(productData); // Call API to add a new product
-                setProducts((prevProducts) => [...prevProducts, newProduct]); // Add the new product to the list
+                const newProduct = await addProduct(productData);
+                setProducts((prevProducts) => [...prevProducts, newProduct]);
                 setSuccess('Product added successfully!');
             }
         } catch (error) {
-            setError(error.message); // Set error message if the API call fails
+            setError(error.message);
         } finally {
-            setLoading(false); // Stop loading after the API call completes
+            setLoading(false);
         }
 
-        setError(''); // Reset error after submission
-        resetForm(); // Reset the form fields and close the modal
+        setError('');
+        resetForm();
     };
 
-    // Handles editing an existing product
     const handleEdit = (product) => {
-        setEditingProductId(product.id); // Set the ID of the product being edited
-        setBarcode(product.barcode); // Set the barcode for the form
-        setDescription(product.description); // Set the description for the form
-        setPrice(product.price); // Set the price for the form
-        setQuantity(product.quantity); // Set the quantity for the form
-        setCategory(product.category); // Set the category for the form
-        setShowModal(true); // Show the modal to edit the product
+        setEditingProductId(product.id);
+        setBarcode(product.barcode);
+        setDescription(product.description);
+        setPrice(product.price);
+        setQuantity(product.quantity);
+        setCategory(product.category);
+        setShowModal(true);
     };
 
-    // Handles deleting a product
     const handleDelete = async (id) => {
         try {
-            setLoading(true); // Start loading during the deletion process
-            await deleteProduct(id); // Call API to delete the product
-            setProducts((prevProducts) => prevProducts.filter((product) => product.id !== id)); // Remove the product from the list
+            setLoading(true);
+            await deleteProduct(id);
+            setProducts((prevProducts) => prevProducts.filter((product) => product.id !== id));
             setSuccess('Product deleted successfully!');
         } catch (error) {
-            setError(error.message); // Set error message if deletion fails
+            setError(error.message);
         } finally {
-            setLoading(false); // Stop loading after deletion
+            setLoading(false);
         }
     };
 
-    // Resets the form fields and closes the modal
     const resetForm = () => {
-        setShowModal(false); // Close the modal
-        setBarcode(''); // Reset barcode field
-        setDescription(''); // Reset description field
-        setPrice(''); // Reset price field
-        setQuantity(''); // Reset quantity field
-        setCategory(''); // Reset category field
-        setEditingProductId(null); // Reset editing product ID
+        setShowModal(false);
+        setBarcode('');
+        setDescription('');
+        setPrice('');
+        setQuantity('');
+        setCategory('');
+        setEditingProductId(null);
     };
 
-    // Handles logout functionality by removing the token from localStorage
     const handleLogout = () => {
-        localStorage.removeItem('userToken'); // Remove token from localStorage for logout
-        navigate('/'); // Redirect to login page
+        localStorage.removeItem('userToken'); // Remove token from localStorage
+        navigate('/'); // Redirect to the login page
     };
 
     return (
@@ -259,7 +246,7 @@ const Dashboard = () => {
                             </Form.Select>
                         </Form.Group>
                         <Button variant="primary" type="submit" className="mt-3">
-                            {editingProductId !== null ? 'Update Product' : 'Add Product'}
+                        {editingProductId !== null ? 'Update Product' : 'Add Product'}
                         </Button>
                     </Form>
                 </Modal.Body>
