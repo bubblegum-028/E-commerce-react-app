@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert, Container, Card } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Import Link here
 import '../App.css'; 
 
 const Login = ({ onLogin }) => {
@@ -20,14 +20,16 @@ const Login = ({ onLogin }) => {
             onLogin(); // Call the login function passed as a prop
             navigate('/dashboard'); // Redirect to the dashboard page
         } else {
-            setError('Invalid email or password. Please try again.');
+            setError('Invalid email or password.'); // Set error message
+            navigate('/productslist'); // Redirect to the products list page
         }
+        
     };
 
     return (
         <div className="login-container">
             <Container className="d-flex justify-content-center align-items-center vh-100">
-                <Card className="shadow-sm" style={{ width: '100%', maxWidth: '450px', height: '400px', padding: '20px' }}>
+                <Card className="shadow-sm" style={{ width: '100%', maxWidth: '450px', padding: '20px' }}>
                     <Card.Body>
                         <h2 className="text-center">Login</h2>
                         {error && <Alert variant="danger">{error}</Alert>}
@@ -61,13 +63,16 @@ const Login = ({ onLogin }) => {
                                 <Form.Check type="checkbox" label="Remember me" />
                             </Form.Group>
 
-                            <Button 
-                                variant="primary" 
-                                type="submit" 
+                            <Button
+                                variant="primary"
+                                type="submit"
                                 className="w-100 submit-button mb-3"
                             >
                                 Submit
                             </Button>
+                            <p className="text-center">
+                                Don't have an account? <Link to="/register">Register here</Link>
+                            </p>
                         </Form>
                     </Card.Body>
                 </Card>
