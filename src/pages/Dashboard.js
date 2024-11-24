@@ -1,69 +1,82 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Button, Modal, Form, Alert } from 'react-bootstrap';
-import ProductCard from '../components/ProductCard';
-import Searchbar from '../components/Searchbar'; // Import the Searchbar component
-import { fetchProducts, addProduct, updateProduct, deleteProduct } from '../api';
+import { Container, Button, Modal, Form, Alert, Spinner } from 'react-bootstrap'; // Importing necessary components from React-Bootstrap
+import ProductCard from '../components/ProductCard'; // Custom component for displaying individual products
+import Searchbar from '../components/Searchbar'; // Custom component for search functionality
+import { fetchProducts, addProduct, updateProduct, deleteProduct } from '../api'; // Importing API functions for CRUD operations
+import { useNavigate } from 'react-router-dom'; // Hook for navigating between routes in the app
 
 const Dashboard = () => {
-    const [products, setProducts] = useState([]);
-    const [showModal, setShowModal] = useState(false);
-    const [barcode, setBarcode] = useState('');
-    const [description, setDescription] = useState('');
-    const [price, setPrice] = useState('');
-    const [quantity, setQuantity] = useState('');
-    const [category, setCategory] = useState('');
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
-    const [editingProductId, setEditingProductId] = useState(null);
-    const [filteredProducts, setFilteredProducts] = useState([]); // State for filtered products
-    const [selectedCategory, setSelectedCategory] = useState(''); // New state for selected category
-    const [searchTerm, setSearchTerm] = useState(''); // State for search term
+    // Array of available product categories for easy maintenance
+    const categories = ["Electronics", "Clothing", "Home Appliances", "Books", "Toys"];
+    
+    // State variables
+    const [products, setProducts] = useState([]); // Stores the list of all products
+    const [showModal, setShowModal] = useState(false); // Controls the visibility of the modal for adding/editing a product
+    const [barcode, setBarcode] = useState(''); // Stores the barcode input
+    const [description, setDescription] = useState(''); // Stores the product description
+    const [price, setPrice] = useState(''); // Stores the product price
+    const [quantity, setQuantity] = useState(''); // Stores the product quantity
+    const [category, setCategory] = useState(''); // Stores the selected product category
+    const [error, setError] = useState(''); // Stores any error messages
+    const [success, setSuccess] = useState(''); // Stores success messages
+    const [editingProductId, setEditingProductId] = useState(null); // Tracks the product being edited
+    const [filteredProducts, setFilteredProducts] = useState([]); // Stores the filtered list of products based on search/category
+    const [selectedCategory, setSelectedCategory] = useState(''); // Tracks the selected category for filtering
+    const [searchTerm, setSearchTerm] = useState(''); // Stores the search term input
+    const [loading, setLoading] = useState(false); // Tracks loading state
+    const navigate = useNavigate(); // Hook for navigation
 
-    // Fetch products when component mounts
+    // Fetch products from the API when the component mounts
     useEffect(() => {
         const loadProducts = async () => {
+            setLoading(true); // Start loading
             try {
-                const productsData = await fetchProducts();
-                setProducts(productsData);
-                setFilteredProducts(productsData); // Initialize filtered products
+                const productsData = await fetchProducts(); // Fetching product data
+                setProducts(productsData); // Setting the fetched products
+                setFilteredProducts(productsData); // Initially displaying all products
             } catch (error) {
-                setError(error.message);
+                setError(error.message); // Handling error in case of failure
+            } finally {
+                setLoading(false); // Stop loading
             }
         };
-        loadProducts();
-    }, []);
+        loadProducts(); // Call the function to fetch products
+    }, []); // Empty dependency array ensures this runs only once
 
-    // Filter products based on search term and selected category
+    // Filtering products based on search term and selected category
     useEffect(() => {
         const filtered = products.filter(product =>
             product.description.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            (selectedCategory ? product.category === selectedCategory : true)
+            (selectedCategory ? product.category === selectedCategory : true) // Filter by selected category if provided
         );
-        setFilteredProducts(filtered);
-    }, [searchTerm, selectedCategory, products]); // Re-run filter whenever these change
+        setFilteredProducts(filtered); // Update the filtered products state
+    }, [searchTerm, selectedCategory, products]); // Runs whenever the search term or selected category changes
 
-    // Handle product search
+    // Handles the search input change
     const handleSearch = (term) => {
-        setSearchTerm(term); // Set the search term
+        setSearchTerm(term); // Update search term
     };
 
-    // Handle category change
+    // Handles category filter change
     const handleCategoryChange = (e) => {
-        setSelectedCategory(e.target.value); // Set the selected category
+        setSelectedCategory(e.target.value); // Update selected category
     };
 
+    // Handles the form submission for adding/editing products
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        e.preventDefault(); // Prevent default form submission
         if (!barcode || !description || !price || !quantity || !category) {
-            setError('Please fill in all fields.');
+            setError('Please fill in all fields.'); // Display error if any field is empty
             return;
         }
 
-        const productData = { barcode, description, price, quantity, category };
+        const productData = { barcode, description, price, quantity, category }; // Product data object to send to the API
 
         try {
+            setLoading(true); // Start loading during API call
             if (editingProductId !== null) {
-                await updateProduct(editingProductId, productData);
+                // If editing an existing product
+                await updateProduct(editingProductId, productData); // Call API to update the product
                 setProducts((prevProducts) =>
                     prevProducts.map((product) =>
                         product.id === editingProductId ? { ...product, ...productData } : product
@@ -71,86 +84,124 @@ const Dashboard = () => {
                 );
                 setSuccess('Product updated successfully!');
             } else {
-                const newProduct = await addProduct(productData);
-                setProducts((prevProducts) => [...prevProducts, newProduct]);
+                // If adding a new product
+                const newProduct = await addProduct(productData); // Call API to add a new product
+                setProducts((prevProducts) => [...prevProducts, newProduct]); // Add the new product to the list
                 setSuccess('Product added successfully!');
             }
         } catch (error) {
-            setError(error.message);
+            setError(error.message); // Set error message if the API call fails
+        } finally {
+            setLoading(false); // Stop loading after the API call completes
         }
 
-        setError('');
-        resetForm();
+        setError(''); // Reset error after submission
+        resetForm(); // Reset the form fields and close the modal
     };
 
+    // Handles editing an existing product
     const handleEdit = (product) => {
-        setEditingProductId(product.id);
-        setBarcode(product.barcode);
-        setDescription(product.description);
-        setPrice(product.price);
-        setQuantity(product.quantity);
-        setCategory(product.category);
-        setShowModal(true);
+        setEditingProductId(product.id); // Set the ID of the product being edited
+        setBarcode(product.barcode); // Set the barcode for the form
+        setDescription(product.description); // Set the description for the form
+        setPrice(product.price); // Set the price for the form
+        setQuantity(product.quantity); // Set the quantity for the form
+        setCategory(product.category); // Set the category for the form
+        setShowModal(true); // Show the modal to edit the product
     };
 
+    // Handles deleting a product
     const handleDelete = async (id) => {
         try {
-            await deleteProduct(id);
-            setProducts((prevProducts) => prevProducts.filter((product) => product.id !== id));
+            setLoading(true); // Start loading during the deletion process
+            await deleteProduct(id); // Call API to delete the product
+            setProducts((prevProducts) => prevProducts.filter((product) => product.id !== id)); // Remove the product from the list
             setSuccess('Product deleted successfully!');
         } catch (error) {
-            setError(error.message);
+            setError(error.message); // Set error message if deletion fails
+        } finally {
+            setLoading(false); // Stop loading after deletion
         }
     };
 
+    // Resets the form fields and closes the modal
     const resetForm = () => {
-        setShowModal(false);
-        setBarcode('');
-        setDescription('');
-        setPrice('');
-        setQuantity('');
-        setCategory('');
-        setEditingProductId(null);
+        setShowModal(false); // Close the modal
+        setBarcode(''); // Reset barcode field
+        setDescription(''); // Reset description field
+        setPrice(''); // Reset price field
+        setQuantity(''); // Reset quantity field
+        setCategory(''); // Reset category field
+        setEditingProductId(null); // Reset editing product ID
+    };
+
+    // Handles logout functionality by removing the token from localStorage
+    const handleLogout = () => {
+        localStorage.removeItem('userToken'); // Remove token from localStorage for logout
+        navigate('/'); // Redirect to login page
     };
 
     return (
         <Container className="mt-4">
             <h1 className="dashboard-title mb-4">Dashboard</h1>
-            <Searchbar onSearch={handleSearch} /> {/* Pass search term directly */}
+
+            {/* Logout Button Positioned to the Right */}
+            <div className="d-flex justify-content-end mb-4">
+                <Button variant="danger" onClick={handleLogout}>
+                    Logout
+                </Button>
+            </div>
+
+            {/* Searchbar component for searching products */}
+            <Searchbar onSearch={handleSearch} />
 
             {/* Category Filter Dropdown */}
             <Form.Group controlId="formBasicCategory" className="mb-4">
                 <Form.Label>Filter by Category</Form.Label>
                 <Form.Select value={selectedCategory} onChange={handleCategoryChange}>
                     <option value="">All Categories</option>
-                    <option value="Electronics">Electronics</option>
-                    <option value="Clothing">Clothing</option>
-                    <option value="Home Appliances">Home Appliances</option>
-                    <option value="Books">Books</option>
-                    <option value="Toys">Toys</option>
+                    {categories.map((cat) => (
+                        <option key={cat} value={cat}>
+                            {cat}
+                        </option>
+                    ))}
                 </Form.Select>
             </Form.Group>
 
+            {/* Button to trigger modal for adding a new product */}
             <Button variant="primary" onClick={() => setShowModal(true)}>
                 Add Product
             </Button>
+
+            {/* Product Cards */}
             <div className="mt-4">
-                {filteredProducts.length === 0 ? (
+                {loading ? (
+                    <Spinner animation="border" variant="primary" />
+                ) : filteredProducts.length === 0 ? (
                     <p>No products available. Please add a product.</p>
                 ) : (
                     filteredProducts.map((product) => (
-                        <ProductCard key={product.id} product={product} onEdit={handleEdit} onDelete={handleDelete} />
+                        <ProductCard
+                            key={product.id}
+                            product={product}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                        />
                     ))
                 )}
             </div>
 
+            {/* Modal for Adding/Editing Product */}
             <Modal show={showModal} onHide={resetForm}>
                 <Modal.Header closeButton>
                     <Modal.Title>{editingProductId !== null ? 'Edit Product' : 'Add Product'}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
+                    {/* Show error or success messages */}
                     {error && <Alert variant="danger">{error}</Alert>}
                     {success && <Alert variant="success">{success}</Alert>}
+                    
+                    {/* Product Form */}
                     <Form onSubmit={handleSubmit}>
                         <Form.Group controlId="formBasicBarcode">
                             <Form.Label>Barcode</Form.Label>
@@ -200,11 +251,11 @@ const Dashboard = () => {
                                 required
                             >
                                 <option value="">Select category</option>
-                                <option value="Electronics">Electronics</option>
-                                <option value="Clothing">Clothing</option>
-                                <option value="Home Appliances">Home Appliances</option>
-                                <option value="Books">Books</option>
-                                <option value="Toys">Toys</option>
+                                {categories.map((cat) => (
+                                    <option key={cat} value={cat}>
+                                        {cat}
+                                    </option>
+                                ))}
                             </Form.Select>
                         </Form.Group>
                         <Button variant="primary" type="submit" className="mt-3">
