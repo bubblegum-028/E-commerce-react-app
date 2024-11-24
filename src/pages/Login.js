@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert, Container, Card } from 'react-bootstrap';
-import { useNavigate, Link } from 'react-router-dom'; // Import Link here
+import { useNavigate, Link } from 'react-router-dom'; 
 import '../App.css'; 
 
 const Login = ({ onLogin }) => {
@@ -14,16 +14,35 @@ const Login = ({ onLogin }) => {
         // Default credentials
         const defaultEmail = 'admin@example.com';
         const defaultPassword = 'password';
-
+    
+        // Assume you have a list of registered users
+        const registeredUsers = [
+            { email: 'john@gmail.com', password: 'password1' },
+            { email: 'user@123.com', password: 'password2' },
+            // Add more registered users as needed
+        ];
+    
         // Check credentials
         if (email === defaultEmail && password === defaultPassword) {
-            onLogin(); // Call the login function passed as a prop
-            navigate('/dashboard'); // Redirect to the dashboard page
+            const userDetails = { email }; // You can include more user details if needed
+            onLogin(userDetails); // Call the login function passed as a prop
+            navigate('/dashboard');
         } else {
-            setError('Invalid email or password.'); // Set error message
-            navigate('/productslist'); // Redirect to the products list page
+            // Check if the email and password match any registered user
+            const registeredUser  = registeredUsers.find(user => user.email === email);
+            
+            if (registeredUser ) {
+                if (registeredUser .password === password) {
+                    const userDetails = { email }; // You can include more user details if needed
+                    onLogin(userDetails); // Call the login function passed as a prop
+                    navigate('/products'); // Redirect to the products list page after login
+                } else {
+                    setError('Invalid password.'); // Set error message
+                }
+            } else {
+                setError('Invalid email.'); // Set error message
+            }
         }
-        
     };
 
     return (
