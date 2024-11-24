@@ -96,7 +96,8 @@ const ProductList = () => {
                                     <Card.Text>Price: ${product.price}</Card.Text>
                                     <Card.Text>Category: {product.category}</Card.Text>
                                     <Card.Text>Available: {product.quantity}</Card.Text>
-                                    <Button variant="primary" onClick={() => handleProductClick(product)}>
+
+                                    <Button variant="info" onClick={() => handleProductClick(product)}>
                                         View Details
                                     </Button>
                                 </Card.Body>
@@ -119,6 +120,7 @@ const ProductList = () => {
                         <p>Barcode: {selectedProduct.barcode}</p>
                     </Modal.Body>
                     <Modal.Footer>
+                        
                         <Button variant="secondary" onClick={closeModal}>
                             Close
                         </Button>
