@@ -26,6 +26,7 @@ const UserRegistration = () => {
     // Handle form submission
     const handleSubmit = (e) => {
         e.preventDefault();
+        setError(''); // Clear previous errors
 
         // Simple form validation
         if (!name || !email || !password || !contact) {
@@ -46,9 +47,13 @@ const UserRegistration = () => {
             return;
         }
 
-        // Simulate successful registration
-        alert('Registration successful!');
-        navigate('/'); // Redirect to login page after registration
+        // Save user data in localStorage (or you can save it in a backend)
+        const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || [];
+        registeredUsers.push({ name, email, password, contact });
+        localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+
+        // Redirect to login after successful registration
+        navigate('/login');
     };
 
     return (
@@ -92,7 +97,7 @@ const UserRegistration = () => {
                                     value={password}
                                     onChange={(e) => {
                                         setPassword(e.target.value);
-                                        checkPasswordStrength(e.target.value); // Check password strength
+                                        checkPasswordStrength(e.target.value);
                                     }}
                                     required
                                 />
@@ -116,11 +121,7 @@ const UserRegistration = () => {
                             </Form.Group>
 
                             {/* Submit Button */}
-                            <Button
-                                variant="primary"
-                                type="submit"
-                                className="w-100 submit-button mb-3"
-                            >
+                            <Button variant="primary" type="submit" className="w-100 submit-button mb-3">
                                 Register
                             </Button>
                         </Form>
