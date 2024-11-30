@@ -9,19 +9,19 @@ import UserRegistration from './pages/UserRegistration';
 import ProductList from './pages/ProductList';
 
 const App = () => {
-    const [user, setUser ] = useState(null); // Store user details (e.g., name, role)
+    const [user, setUser] = useState(null); // Store user details (e.g., name, role)
     const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
     const [products, setProducts] = useState([]); // Manage product list state
 
     // Handle user login
     const handleLogin = (userDetails) => {
-        setUser (userDetails); // Set user data
+        setUser(userDetails); // Set user data
         setIsLoggedIn(true);  // Update login status
     };
 
     // Handle user logout
     const handleLogout = () => {
-        setUser (null);       // Clear user data
+        setUser(null);       // Clear user data
         setIsLoggedIn(false); // Update login status
     };
 
@@ -30,43 +30,37 @@ const App = () => {
             <Routes>
                 {/* Registration Page */}
                 <Route path="/register" element={<UserRegistration />} />
-                
-                                {/* Login Page */}
-                                <Route 
+
+                {/* Login Page */}
+                <Route 
                     path="/" 
-                    element={isLoggedIn ? <Navigate to="/products" /> : <Login onLogin={handleLogin} />} 
+                    element={isLoggedIn ? <Navigate to={user.role === 'admin' ? '/dashboard' : '/products'} /> : <Login onLogin={handleLogin} />} 
                 />
-                
-                {/* Dashboard */}
+
+                {/* Dashboard (only accessible by admin) */}
                 <Route 
                     path="/dashboard" 
-                    element={
-                        isLoggedIn ? 
+                    element={isLoggedIn && user?.role === 'admin' ? 
                         <Dashboard products={products} setProducts={setProducts} onLogout={handleLogout} /> : 
-                        <Navigate to="/" />
-                    } 
+                        <Navigate to="/" />} 
                 />
-                
-                {/* Product List */}
+
+                {/* Product List (accessible by regular users) */}
                 <Route 
                     path="/products" 
-                    element={
-                        isLoggedIn ? 
+                    element={isLoggedIn && user?.role === 'user' ? 
                         <ProductList products={products} /> : 
-                        <Navigate to="/" />
-                    } 
+                        <Navigate to="/" />} 
                 />
-                
+
                 {/* Edit Product */}
                 <Route 
                     path="/edit/:id" 
-                    element={
-                        isLoggedIn ? 
+                    element={isLoggedIn ? 
                         <EditProduct products={products} setProducts={setProducts} /> : 
-                        <Navigate to="/" />
-                    } 
+                        <Navigate to="/" />}
                 />
-                
+
                 {/* Fallback for invalid routes */}
                 <Route path="*" element={<Navigate to="/" />} />
             </Routes>
@@ -75,4 +69,3 @@ const App = () => {
 };
 
 export default App;
-               
