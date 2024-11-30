@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert, Container, Card } from 'react-bootstrap';
-import { useNavigate, Link } from 'react-router-dom'; 
-import '../App.css'; 
+import { useNavigate, Link } from 'react-router-dom';
 
 const Login = ({ onLogin }) => {
     const [email, setEmail] = useState('');
@@ -11,37 +10,34 @@ const Login = ({ onLogin }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Default credentials
+
+        // Default credentials for admin
         const defaultEmail = 'admin@example.com';
         const defaultPassword = 'password';
-    
-        // Assume you have a list of registered users
-        const registeredUsers = [
-            { email: 'john@gmail.com', password: 'password1' },
-            { email: 'user@123.com', password: 'password2' },
-            // Add more registered users as needed
-        ];
-    
-        // Check credentials
+
+        // Check if the entered email and password match the admin credentials
         if (email === defaultEmail && password === defaultPassword) {
-            const userDetails = { email }; // You can include more user details if needed
+            const userDetails = { email: defaultEmail, role: 'admin' }; // Assigning admin role
             onLogin(userDetails); // Call the login function passed as a prop
-            navigate('/dashboard');
-        } else {
-            // Check if the email and password match any registered user
-            const registeredUser  = registeredUsers.find(user => user.email === email);
-            
-            if (registeredUser ) {
-                if (registeredUser .password === password) {
-                    const userDetails = { email }; // You can include more user details if needed
-                    onLogin(userDetails); // Call the login function passed as a prop
-                    navigate('/products'); // Redirect to the products list page after login
-                } else {
-                    setError('Invalid password.'); // Set error message
-                }
+            navigate('/dashboard'); // Redirect to dashboard for admin to add products
+            return;
+        }
+
+        // Retrieve registered users from localStorage
+        const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || [];
+        const registeredUser = registeredUsers.find(user => user.email === email);
+
+        // Check if user exists and if password matches
+        if (registeredUser) {
+            if (registeredUser.password === password) {
+                const userDetails = { email, role: 'user' }; // Assigning user role
+                onLogin(userDetails); // Call the login function passed as a prop
+                navigate('/products'); // Redirect to product list for regular users
             } else {
-                setError('Invalid email.'); // Set error message
+                setError('Invalid password.');
             }
+        } else {
+            setError('Invalid email.');
         }
     };
 
@@ -78,15 +74,7 @@ const Login = ({ onLogin }) => {
                                 />
                             </Form.Group>
 
-                            <Form.Group controlId="formBasicCheckbox">
-                                <Form.Check type="checkbox" label="Remember me" />
-                            </Form.Group>
-
-                            <Button
-                                variant="primary"
-                                type="submit"
-                                className="w-100 submit-button mb-3"
-                            >
+                            <Button variant="primary" type="submit" className="w-100 submit-button mb-3">
                                 Submit
                             </Button>
                             <p className="text-center">
