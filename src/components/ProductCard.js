@@ -1,5 +1,6 @@
 // src/components/ProductCard.js
 import React from 'react'; // Import React
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { Card, Button } from 'react-bootstrap'; // Import necessary components from react-bootstrap
 import { Link } from 'react-router-dom'; // Import Link for navigating to product details page
 

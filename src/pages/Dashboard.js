@@ -3,6 +3,7 @@ import { Container, Button, Modal, Form, Alert } from 'react-bootstrap';
 import ProductCard from '../components/ProductCard';
 import Searchbar from '../components/Searchbar'; // Import the Searchbar component
 import { fetchProducts, addProduct, updateProduct, deleteProduct } from '../api';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
     const [products, setProducts] = useState([]);
@@ -20,6 +21,7 @@ const Dashboard = () => {
     const [searchTerm, setSearchTerm] = useState(''); // State for search term
     const [sortPrice, setSortPrice] = useState(''); // State for sorting by price
     const [sortStock, setSortStock] = useState(''); // State for sorting by stock
+    const navigate = useNavigate();
 
     // Fetch products when component mounts
     useEffect(() => {
@@ -139,9 +141,23 @@ const Dashboard = () => {
         setEditingProductId(null);
     };
 
+    const handleLogout = () => {
+        // Remove token and role from localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        // Redirect to login page
+        navigate('/login');
+    };
+
     return (
         <Container className="mt-4">
             <h1 className="dashboard-title mb-4">Admin Dashboard</h1>
+            
+            {/* Logout Button */}
+            <Button variant="danger" onClick={handleLogout} className="mb-4">
+                Logout
+            </Button>
+
             <Searchbar onSearch={handleSearch} /> {/* Pass search term directly */}
 
             {/* Category Filter Dropdown */}

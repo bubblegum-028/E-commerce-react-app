@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard'; // Import ProductCard
 import Searchbar from '../components/Searchbar'; // Import Searchbar
 import { fetchProducts } from '../api';
@@ -12,6 +13,7 @@ const ProductList = () => {
     const [sortPrice, setSortPrice] = useState('');
     const [sortStock, setSortStock] = useState('');
     const [error, setError] = useState('');
+    const navigate = useNavigate();
 
     // Fetch products when component mounts
     useEffect(() => {
@@ -71,9 +73,22 @@ const ProductList = () => {
         setSortStock(e.target.value);
     };
 
+    // Handle Logout
+    const handleLogout = () => {
+        // Clear authentication-related data
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+
+        // Redirect to login page
+        navigate('/login');
+    };
+
     return (
         <Container className="mt-4">
-            <h1 className="mb-4">Shop Our Products</h1>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h1>Shop Our Products</h1>
+                <Button variant="danger" onClick={handleLogout}>Logout</Button>
+            </div>
 
             {/* Searchbar */}
             <Searchbar onSearch={handleSearch} />

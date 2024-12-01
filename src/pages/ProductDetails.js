@@ -1,5 +1,4 @@
-// src/pages/ProductDetails.js
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 const ProductDetails = ({ products }) => {
@@ -17,9 +16,9 @@ const ProductDetails = ({ products }) => {
   return (
     <div>
       <h1>{product.description}</h1>
-      <p>{product.price}</p>
+      <p>Price: ${product.price}</p>
       <p>{product.quantity} available</p>
-      <p>{product.category}</p>
+      <p>Category: {product.category}</p>
       {/* Add other product details as needed */}
     </div>
   );

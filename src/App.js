@@ -3,83 +3,75 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import ViewProducts from './pages/ViewProducts';
-import EditProduct from './pages/EditProduct';
-import ProductList from './pages/ProductList';  // Import ProductList page for public view
-import ProductDetails from './pages/ProductDetails';  // Import ProductDetails page for product details
+import Register from './pages/Register';
+import ProductList from './pages/ProductList';  // Products listing page
+import ProductDetails from './pages/ProductDetails';  // Product details page
+import Dashboard from './pages/Dashboard';  // Admin Dashboard
 
 const App = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(
-        localStorage.getItem('isLoggedIn') === 'true'
-    );
-    const [products, setProducts] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
+  const [role, setRole] = useState(''); // Track the role of the logged-in user
 
-    // Function to handle login status and persist the state
-    const handleLogin = () => {
-        setIsLoggedIn(true);
-        localStorage.setItem('isLoggedIn', 'true'); // Persist login state
-    };
+  useEffect(() => {
+    // Check if the user is already logged in
+    const token = localStorage.getItem('token');
+    const userRole = localStorage.getItem('role');
+    console.log('User Role from LocalStorage:', userRole);  // Debugging line
 
-    // Fetch products on mount (for public pages)
-    useEffect(() => {
-        // Fetch all products (or from your API)
-        const fetchProducts = async () => {
-            try {
-                const response = await fetch('http://localhost:8000/api/products'); // Adjust API endpoint if needed
-                const data = await response.json();
-                setProducts(data);
-            } catch (error) {
-                console.error('Error fetching products:', error);
-            }
-        };
-        fetchProducts();
-    }, []);
+    if (token && userRole) {
+      setIsLoggedIn(true);
+      setRole(userRole);
+    }
+  }, []);
 
-    return (
-        <Router>
-            <Routes>
-                {/* Public Route for Product List (Front Store) */}
-                <Route path="/" element={<ProductList products={products} />} /> 
+  const handleLogin = (userRole) => {
+    setIsLoggedIn(true);
+    setRole(userRole); // Set the role of the logged-in user
+  };
 
-                {/* Public Route for Product Details */}
-                <Route path="/product/:productId" element={<ProductDetails products={products} />} />
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    setIsLoggedIn(false);
+    setRole('');
+  };
 
-                {/* Authenticated Route for Login */}
-                <Route
-                    path="/login"
-                    element={
-                        isLoggedIn ? (
-                            <Navigate to="/dashboard" replace />
-                        ) : (
-                            <Login onLogin={handleLogin} />
-                        )
-                    }
-                />
+  return (
+    <Router>
+      <Routes>
+        {/* Redirect root path based on login status */}
+        <Route
+          path="/"
+          element={isLoggedIn ? <Navigate to={role === 'admin' ? '/dashboard' : '/products'} /> : <Navigate to="/login" />}
+        />
 
-                {/* Authenticated Routes for Admin Dashboard */}
-                {isLoggedIn && (
-                    <>
-                        <Route
-                            path="/dashboard"
-                            element={<Dashboard products={products} setProducts={setProducts} />}
-                        />
-                        <Route
-                            path="/products"
-                            element={<ViewProducts products={products} setProducts={setProducts} />}
-                        />
-                        <Route
-                            path="/edit/:id"
-                            element={<EditProduct products={products} setProducts={setProducts} />}
-                        />
-                    </>
-                )}
+        {/* Login Route */}
+        <Route
+          path="/login"
+          element={isLoggedIn ? <Navigate to={role === 'admin' ? '/dashboard' : '/products'} /> : <Login onLogin={handleLogin} />}
+        />
 
-                {/* Fallback route for unauthenticated access */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-        </Router>
-    );
+        {/* Register Route */}
+        <Route path="/register" element={<Register />} />
+
+        {/* Protected Routes for logged-in users */}
+        {isLoggedIn && (
+          <>
+            <Route path="/products" element={<ProductList />} />
+            <Route path="/product/:id" element={<ProductDetails />} />
+          </>
+        )}
+
+        {/* Protected Route for Admin */}
+        {isLoggedIn && role === 'admin' && (
+          <Route path="/dashboard" element={<Dashboard />} />
+        )}
+
+        {/* Fallback Route */}
+        <Route path="*" element={<Navigate to="/login" />} />
+      </Routes>
+    </Router>
+  );
 };
 
 export default App;
