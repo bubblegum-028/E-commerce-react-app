@@ -80,3 +80,42 @@ export const deleteProduct = async (id) => {
     
     return await response.json();
 };
+
+// Add to cart
+export const addToCart = async (productId, quantity) => {
+    const response = await fetch(`${API_BASE_URL}/cart`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id: productId, quantity }),
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to add to cart');
+    }
+
+    return await response.json();
+};
+
+// Fetch cart items
+export const fetchCart = async () => {
+    const response = await fetch(`${API_BASE_URL}/cart`);
+    if (!response.ok) {
+        throw new Error('Failed to fetch cart');
+    }
+    return await response.json();
+};
+
+// Checkout
+export const checkout = async (data) => {
+    const response = await fetch(`${API_BASE_URL}/checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        throw new Error('Checkout failed');
+    }
+
+    return await response.json();
+};

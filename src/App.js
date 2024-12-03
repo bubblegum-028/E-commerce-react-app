@@ -7,16 +7,19 @@ import Register from './pages/Register';
 import ProductList from './pages/ProductList';  // Products listing page
 import ProductDetails from './pages/ProductDetails';  // Product details page
 import Dashboard from './pages/Dashboard';  // Admin Dashboard
+import CartPage from './pages/CartPage';  // Cart page
+import CheckoutPage from './pages/CheckoutPage';  // Checkout page
+import { CartProvider } from './context/CartContext';  // Cart context provider
 
 const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
-  const [role, setRole] = useState(''); // Track the role of the logged-in user
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [role, setRole] = useState('');
 
   useEffect(() => {
-    // Check if the user is already logged in
+    // Check if user is already logged in
     const token = localStorage.getItem('token');
     const userRole = localStorage.getItem('role');
-    console.log('User Role from LocalStorage:', userRole);  // Debugging line
+    console.log('User Role from LocalStorage:', userRole); // Debugging
 
     if (token && userRole) {
       setIsLoggedIn(true);
@@ -26,7 +29,7 @@ const App = () => {
 
   const handleLogin = (userRole) => {
     setIsLoggedIn(true);
-    setRole(userRole); // Set the role of the logged-in user
+    setRole(userRole);
   };
 
   const handleLogout = () => {
@@ -37,40 +40,54 @@ const App = () => {
   };
 
   return (
-    <Router>
-      <Routes>
-        {/* Redirect root path based on login status */}
-        <Route
-          path="/"
-          element={isLoggedIn ? <Navigate to={role === 'admin' ? '/dashboard' : '/products'} /> : <Navigate to="/login" />}
-        />
+    <CartProvider>
+      <Router>
+        <Routes>
+          {/* Default route based on login status */}
+          <Route
+            path="/"
+            element={isLoggedIn ? (
+              role === 'admin' ? <Navigate to="/dashboard" /> : <Navigate to="/products" />
+            ) : (
+              <Navigate to="/login" />
+            )}
+          />
 
-        {/* Login Route */}
-        <Route
-          path="/login"
-          element={isLoggedIn ? <Navigate to={role === 'admin' ? '/dashboard' : '/products'} /> : <Login onLogin={handleLogin} />}
-        />
+          {/* Login Route */}
+          <Route
+            path="/login"
+            element={isLoggedIn ? (
+              role === 'admin' ? <Navigate to="/dashboard" /> : <Navigate to="/products" />
+            ) : (
+              <Login onLogin={handleLogin} />
+            )}
+          />
 
-        {/* Register Route */}
-        <Route path="/register" element={<Register />} />
+          {/* Register Route */}
+          <Route path="/register" element={<Register />} />
 
-        {/* Protected Routes for logged-in users */}
-        {isLoggedIn && (
-          <>
-            <Route path="/products" element={<ProductList />} />
-            <Route path="/product/:id" element={<ProductDetails />} />
-          </>
-        )}
+          {/* User Routes */}
+          {isLoggedIn && role === 'user' && (
+            <>
+              <Route path="/products" element={<ProductList />} />
+              <Route path="/product/:id" element={<ProductDetails />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+            </>
+          )}
 
-        {/* Protected Route for Admin */}
-        {isLoggedIn && role === 'admin' && (
-          <Route path="/dashboard" element={<Dashboard />} />
-        )}
+          {/* Admin Routes */}
+          {isLoggedIn && role === 'admin' && (
+            <>
+              <Route path="/dashboard" element={<Dashboard />} />
+            </>
+          )}
 
-        {/* Fallback Route */}
-        <Route path="*" element={<Navigate to="/login" />} />
-      </Routes>
-    </Router>
+          {/* Fallback Route */}
+          <Route path="*" element={<Navigate to={isLoggedIn ? (role === 'admin' ? '/dashboard' : '/products') : '/login'} />} />
+        </Routes>
+      </Router>
+    </CartProvider>
   );
 };
 

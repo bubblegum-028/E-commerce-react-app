@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard'; // Import ProductCard
 import Searchbar from '../components/Searchbar'; // Import Searchbar
 import { fetchProducts } from '../api';
+import { useCart } from '../context/CartContext'; // Import the cart context
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
@@ -14,6 +15,9 @@ const ProductList = () => {
     const [sortStock, setSortStock] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+
+    const { cart } = useCart(); // Access cart from context
+    const cartCount = cart.reduce((count, item) => count + item.quantity, 0); // Calculate total cart items
 
     // Fetch products when component mounts
     useEffect(() => {
@@ -87,7 +91,12 @@ const ProductList = () => {
         <Container className="mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h1>Shop Our Products</h1>
-                <Button variant="danger" onClick={handleLogout}>Logout</Button>
+                <div>
+                    <Button variant="success" className="me-3" onClick={() => navigate('/cart')}>
+                        Cart {cartCount > 0 && `(${cartCount})`}
+                    </Button>
+                    <Button variant="danger" onClick={handleLogout}>Logout</Button>
+                </div>
             </div>
 
             {/* Searchbar */}

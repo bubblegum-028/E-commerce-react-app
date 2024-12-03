@@ -12,37 +12,45 @@ const Login = ({ onLogin }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-      
+        setError('');
         try {
-            const response = await fetch('http://localhost:8000/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password, role: loginType }), // Send role along with login data
-            });
+          const response = await fetch('http://localhost:8000/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, role: loginType }),
+          });
       
-            const data = await response.json();
-            console.log('Login Response:', data); // Check what is returned in the response
+          const data = await response.json();
+          console.log('Login Response:', data); // Debug response
       
-            if (response.ok) {
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('role', data.role); // Store role in localStorage
+          if (response.ok) {
+            // Store role and user information locally
+            localStorage.setItem('role', data.role);
+            localStorage.setItem('user', JSON.stringify(data.user));
       
-                onLogin(data.role);  // Pass the role to the parent component
+            // Notify parent about login
+            onLogin(data.role);
       
-                if (data.role === 'admin') {
-                    navigate('/dashboard'); // Redirect to admin dashboard
-                } else {
-                    navigate('/products'); // Redirect to products
-                }
+            // Redirect based on role
+            if (data.role === 'admin') {
+              navigate('/dashboard');
             } else {
-                setError(data.message || 'Login failed. Please try again.');
+              navigate('/products');
             }
+          } else {
+            setError(data.message || 'Login failed. Please try again.');
+          }
         } catch (error) {
-            setError('An error occurred. Please try again later.');
+          console.error('Request Error:', error);
+          setError('An unexpected error occurred. Please try again later.');
         }
       };
+      
+    
+    
+    
+    
+    
       
 
     return (
