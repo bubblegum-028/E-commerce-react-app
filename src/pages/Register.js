@@ -3,6 +3,7 @@ import { Form, Button, Alert, Container, Card, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import '../App.css';
 
+
 const Register = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -15,12 +16,13 @@ const Register = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+
     const handleRegister = async (e) => {
         e.preventDefault();
         setError('');
         setSuccessMessage('');
         setLoading(true);
-    
+   
         // Client-side validation
         if (!name || !email || !password || !contact) {
             setError('All fields are required.');
@@ -42,7 +44,7 @@ const Register = () => {
             setLoading(false);
             return;
         }
-    
+   
         try {
             const response = await fetch('http://localhost:8000/api/register', {
                 method: 'POST',
@@ -57,13 +59,13 @@ const Register = () => {
                     role,
                 }),
             });
-    
+   
             const data = await response.json();
-    
+   
             if (response.ok) {
                 const roleMessage = role === 'admin' ? 'Admin registered successfully!' : 'User registered successfully!';
                 setSuccessMessage(roleMessage);
-    
+   
                 setTimeout(() => navigate('/login'), 2000);
             } else {
                 setError(data.errors ? Object.values(data.errors).join(', ') : data.message || 'Registration failed.');
@@ -74,8 +76,9 @@ const Register = () => {
             setLoading(false);
         }
     };
-    
-    
+   
+   
+
 
     return (
         <div className="register-container">
@@ -97,6 +100,7 @@ const Register = () => {
                                 />
                             </Form.Group>
 
+
                             <Form.Group controlId="formBasicEmail" className="mt-3">
                                 <Form.Label>Email address</Form.Label>
                                 <Form.Control
@@ -107,6 +111,7 @@ const Register = () => {
                                     required
                                 />
                             </Form.Group>
+
 
                             <Form.Group controlId="formBasicPassword" className="mt-3">
                                 <Form.Label>Password</Form.Label>
@@ -119,6 +124,7 @@ const Register = () => {
                                 />
                             </Form.Group>
 
+
                             <Form.Group controlId="formBasicConfirmPassword" className="mt-3">
                                 <Form.Label>Confirm Password</Form.Label>
                                 <Form.Control
@@ -130,6 +136,7 @@ const Register = () => {
                                 />
                             </Form.Group>
 
+
                             <Form.Group controlId="formBasicContact" className="mt-3">
                                 <Form.Label>Contact Information</Form.Label>
                                 <Form.Control
@@ -140,6 +147,7 @@ const Register = () => {
                                     required
                                 />
                             </Form.Group>
+
 
                             <Form.Group controlId="formBasicRole" className="mt-3">
                                 <Form.Label>Select Role</Form.Label>
@@ -154,11 +162,13 @@ const Register = () => {
                                 </Form.Control>
                             </Form.Group>
 
+
                             {loading && (
                                 <div className="text-center mt-3">
                                     <Spinner animation="border" variant="primary" />
                                 </div>
                             )}
+
 
                             <Button variant="primary" type="submit" className="w-100 mt-4" disabled={loading}>
                                 Register
@@ -171,4 +181,8 @@ const Register = () => {
     );
 };
 
+
 export default Register;
+
+
+
