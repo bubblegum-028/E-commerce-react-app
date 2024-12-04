@@ -2,16 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 const ProductDetails = ({ products }) => {
-  const { productId } = useParams();
-  const [product, setProduct] = useState(null);
+  const { productId } = useParams();  // Get the productId from the URL params
+  const [product, setProduct] = useState(null);  // State for product details
 
   useEffect(() => {
-    // Find the product by ID
-    const foundProduct = products.find((prod) => prod.id === parseInt(productId));
-    setProduct(foundProduct);
-  }, [productId, products]);
+    // Debugging: Log productId and products
+    console.log("Product ID from URL:", productId);
+    console.log("Products list:", products);
 
-  if (!product) return <p>Product not found</p>;
+    // Find the product by ID from products array
+    const foundProduct = products.find((prod) => prod.id === parseInt(productId));
+    setProduct(foundProduct);  // Set the found product to state
+  }, [productId, products]);  // Re-run whenever productId or products change
+
+  if (!product) return <p>Product not found</p>;  // Show error message if product not found
 
   return (
     <div>

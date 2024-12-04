@@ -1,87 +1,90 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
-import { Button, Container, Row, Col, Card, Form, Table } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
+import { Container, Row, Col, Card, Button, Spinner, Alert } from 'react-bootstrap';
 
 const CartPage = () => {
-    const { cart, updateQuantity, removeFromCart } = useCart(); // Access cart functions from context
+    const { cart, updateQuantity, removeFromCart, loading, error } = useCart();
+    const navigate = useNavigate(); // Initialize navigate
 
+    // Calculate grand total
     const grandTotal = cart.reduce(
-        (total, item) => total + parseFloat(item.price) * item.quantity,
+        (total, item) => total + parseFloat(item.price || 0) * (item.quantity || 0),
         0
     );
+
+    if (loading) {
+        return (
+            <div className="text-center my-5">
+                <Spinner animation="border" variant="primary" />
+                <p>Loading your cart items...</p>
+            </div>
+        );
+    }
 
     return (
         <Container className="mt-4">
             <h1 className="mb-4 text-center">Your Shopping Cart</h1>
+            {error && <Alert variant="danger">{error}</Alert>}
+
             {cart.length === 0 ? (
                 <div className="text-center">
                     <h4>Your cart is empty!</h4>
-                    <p>Browse our products and add items to your cart.</p>
-                    <Button variant="primary" href="/products">
+                    <Button variant="primary" href="/products" className="mt-3">
                         Shop Now
                     </Button>
                 </div>
             ) : (
                 <>
-                    <Row className="mb-4">
-                        <Col>
-                            <Table striped bordered hover responsive className="text-center">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>Price</th>
-                                        <th>Quantity</th>
-                                        <th>Total</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {cart.map((item) => (
-                                        <tr key={item.id}>
-                                            <td>
-                                                <strong>{item.description}</strong>
-                                            </td>
-                                            <td>${parseFloat(item.price).toFixed(2)}</td>
-                                            <td>
-                                                <Form.Control
-                                                    type="number"
-                                                    min="1"
-                                                    value={item.quantity}
-                                                    onChange={(e) =>
-                                                        updateQuantity(
-                                                            item.id,
-                                                            parseInt(e.target.value, 10)
-                                                        )
-                                                    }
-                                                    className="w-50 mx-auto"
-                                                />
-                                            </td>
-                                            <td>
-                                                $
-                                                {(
-                                                    parseFloat(item.price) * item.quantity
-                                                ).toFixed(2)}
-                                            </td>
-                                            <td>
-                                                <Button
-                                                    variant="danger"
-                                                    onClick={() => removeFromCart(item.id)}
-                                                >
-                                                    Remove
-                                                </Button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </Table>
-                        </Col>
+                    <Row xs={1} sm={2} md={3} lg={4} className="g-4">
+                        {cart.map((item) => (
+                            <Col key={item.id}>
+                                <Card className="h-100">
+                                    <Card.Body>
+                                        <Card.Title>{item.product.description}</Card.Title>
+                                        <Card.Text>
+                                            <strong>Category:</strong> {item.product.category} <br />
+                                            <strong>Price:</strong> ${parseFloat(item.product.price).toFixed(2)} <br />
+                                            <strong>Quantity:</strong> {item.quantity} <br />
+                                            <strong>Total:</strong> $
+                                            {(parseFloat(item.price) * item.quantity).toFixed(2)}
+                                        </Card.Text>
+                                        <Button
+                                            variant="danger"
+                                            onClick={() => removeFromCart(item.id)}
+                                            className="me-2"
+                                        >
+                                            Remove
+                                        </Button>
+                                        <Button
+                                            variant="success"
+                                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                            className="me-2"
+                                        >
+                                            +
+                                        </Button>
+                                        <Button
+                                            variant="warning"
+                                            onClick={() =>
+                                                updateQuantity(
+                                                    item.id,
+                                                    Math.max(item.quantity - 1, 1)
+                                                )
+                                            }
+                                        >
+                                            -
+                                        </Button>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        ))}
                     </Row>
-                    <div className="text-end">
-                        <h4 className="mb-3">Grand Total: ${grandTotal.toFixed(2)}</h4>
+                    <div className="text-end mt-4">
+                        <h4>Grand Total: ${grandTotal.toFixed(2)}</h4>
                         <Button
                             variant="success"
-                            size="lg"
-                            onClick={() => alert('Proceeding to checkout...')}
+                            className="mt-3"
+                            onClick={() => navigate('/checkout')} // Navigate to the checkout page
                         >
                             Checkout
                         </Button>

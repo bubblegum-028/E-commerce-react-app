@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
+import { Container, Row, Col, Table, Form, Button, Alert } from 'react-bootstrap';
 
 const CheckoutPage = () => {
     const { cart, clearCart } = useCart();
@@ -8,55 +9,123 @@ const CheckoutPage = () => {
         address: '',
         paymentMethod: 'COD',
     });
+    const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState('');
+
+    // Calculate grand total
+    const grandTotal = cart.reduce(
+        (total, item) => total + parseFloat(item.price || 0) * (item.quantity || 0),
+        0
+    );
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setShippingInfo({ ...shippingInfo, [name]: value });
     };
 
-    const handleCheckout = () => {
-        alert('Order placed successfully!');
-        clearCart();
+    const handleCheckout = async (e) => {
+        e.preventDefault(); // Prevent form submission reload
+
+        if (!shippingInfo.name || !shippingInfo.address) {
+            setError('Please fill out all required fields.');
+            return;
+        }
+
+        try {
+            // Mock API call for order placement
+            console.log('Placing Order:', { cart, shippingInfo });
+            // Simulate API call with a timeout
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+
+            setSuccessMessage('Order placed successfully!');
+            clearCart(); // Clear the cart after successful order
+            setError(null); // Clear any previous error
+        } catch (err) {
+            console.error('Checkout failed:', err);
+            setError('Failed to place order. Please try again.');
+        }
     };
 
     return (
-        <div>
-            <h1>Checkout</h1>
-            <form onSubmit={handleCheckout}>
-                <div>
-                    <label>Name</label>
-                    <input
-                        type="text"
-                        name="name"
-                        value={shippingInfo.name}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Address</label>
-                    <input
-                        type="text"
-                        name="address"
-                        value={shippingInfo.address}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Payment Method</label>
-                    <select
-                        name="paymentMethod"
-                        value={shippingInfo.paymentMethod}
-                        onChange={handleInputChange}
-                    >
-                        <option value="COD">Cash on Delivery</option>
-                        <option value="Card">Credit/Debit Card</option>
-                    </select>
-                </div>
-                <button type="submit">Place Order</button>
-            </form>
-        </div>
+        <Container className="mt-4">
+            <h1 className="mb-4 text-center">Checkout</h1>
+            {error && <Alert variant="danger">{error}</Alert>}
+            {successMessage && <Alert variant="success">{successMessage}</Alert>}
+
+            <Row>
+                {/* Cart Summary */}
+                <Col md={6}>
+                    <h4>Order Summary</h4>
+                    {cart.length === 0 ? (
+                        <p>Your cart is empty. Please add items to proceed with checkout.</p>
+                    ) : (
+                        <Table striped bordered>
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {cart.map((item) => (
+                                    <tr key={item.id}>
+                                        <td>{item.product.description}</td>
+                                        <td>{item.quantity}</td>
+                                        <td>${parseFloat(item.price).toFixed(2)}</td>
+                                    </tr>
+                                ))}
+                                <tr>
+                                    <td colSpan="2"><strong>Grand Total</strong></td>
+                                    <td>${grandTotal.toFixed(2)}</td>
+                                </tr>
+                            </tbody>
+                        </Table>
+                    )}
+                </Col>
+
+                {/* Shipping Details */}
+                <Col md={6}>
+                    <h4>Shipping Information</h4>
+                    <Form onSubmit={handleCheckout}>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Name</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="name"
+                                value={shippingInfo.name}
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Address</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="address"
+                                value={shippingInfo.address}
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Payment Method</Form.Label>
+                            <Form.Select
+                                name="paymentMethod"
+                                value={shippingInfo.paymentMethod}
+                                onChange={handleInputChange}
+                            >
+                                <option value="COD">Cash on Delivery</option>
+                                <option value="Card">Credit/Debit Card</option>
+                            </Form.Select>
+                        </Form.Group>
+                        <Button type="submit" variant="success" disabled={cart.length === 0}>
+                            Place Order
+                        </Button>
+                    </Form>
+                </Col>
+            </Row>
+        </Container>
     );
 };
 

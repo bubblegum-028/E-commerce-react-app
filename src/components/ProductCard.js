@@ -1,32 +1,32 @@
-import React from 'react'; // Import React
+import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Card, Button } from 'react-bootstrap'; // Import necessary components from react-bootstrap
-import { Link } from 'react-router-dom'; // Import Link for navigating to product details page
-import { useCart } from '../context/CartContext'; // Import CartContext for cart management
+import { Card, Button } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 
-// ProductCard component: Displays product details with either Edit/Delete (admin) or View/Add to Cart (front store)
 const ProductCard = ({ product, onEdit, onDelete }) => {
-    const { addToCart, cart } = useCart(); // Access cart functions and cart state from the context
+    const { addToCart } = useCart(); // Access the addToCart function from context
 
-    // Check if the product is already in the cart
-    const isInCart = cart.some((item) => item.id === product.id);
-
-    const handleAddToCart = () => {
-        addToCart(product); // Add the product to the cart
-        alert(`${product.description} has been added to the cart!`);
+    const handleAddToCart = async () => {
+        try {
+            await addToCart(product); // Add product to cart
+            alert(`${product.description} has been added to the cart!`);
+        } catch (error) {
+            console.error('Failed to add to cart:', error);
+            alert('Failed to add the product to the cart. Please try again.');
+        }
     };
 
     return (
-        <Card className="mb-3"> {/* Card component for displaying product information */}
+        <Card className="mb-3">
             <Card.Body>
-                <Card.Title>{product.description}</Card.Title> {/* Display product description */}
+                <Card.Title>{product.description}</Card.Title>
                 <Card.Text>
-                    <strong>Price:</strong> ${product.price}<br /> {/* Display product price */}
-                    <strong>Stock:</strong> {product.quantity}<br /> {/* Display available quantity */}
-                    <strong>Category:</strong> {product.category} {/* Display product category */}
+                    <strong>Price:</strong> ${parseFloat(product.price || 0).toFixed(2)}<br />
+                    <strong>Stock:</strong> {product.quantity > 0 ? product.quantity : 'Out of Stock'}<br />
+                    <strong>Category:</strong> {product.category}
                 </Card.Text>
 
-                {/* Admin view: Edit and Delete buttons */}
                 {onEdit && onDelete ? (
                     <>
                         <Button variant="secondary" onClick={() => onEdit(product)}>
@@ -37,17 +37,16 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
                         </Button>
                     </>
                 ) : (
-                    // Front store view: View Product and Add to Cart buttons
                     <div className="d-flex justify-content-between align-items-center">
                         <Link to={`/product/${product.id}`}>
                             <Button variant="primary" className="me-2">View Product</Button>
                         </Link>
                         <Button
-                            variant={isInCart ? "secondary" : "success"}
-                            onClick={isInCart ? null : handleAddToCart}
-                            disabled={isInCart}
+                            variant="success"
+                            onClick={handleAddToCart}
+                            disabled={product.quantity <= 0}
                         >
-                            {isInCart ? "In Cart" : "Add to Cart"}
+                            Add to Cart
                         </Button>
                     </div>
                 )}
@@ -56,4 +55,4 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
     );
 };
 
-export default ProductCard; // Export the ProductCard component for use in other parts of the application
+export default ProductCard;

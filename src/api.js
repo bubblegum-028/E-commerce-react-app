@@ -81,41 +81,81 @@ export const deleteProduct = async (id) => {
     return await response.json();
 };
 
-// Add to cart
-export const addToCart = async (productId, quantity) => {
-    const response = await fetch(`${API_BASE_URL}/cart`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_id: productId, quantity }),
-    });
 
-    if (!response.ok) {
-        throw new Error('Failed to add to cart');
-    }
 
-    return await response.json();
-};
-
-// Fetch cart items
+// Fetch cart items for the authenticated user
 export const fetchCart = async () => {
-    const response = await fetch(`${API_BASE_URL}/cart`);
-    if (!response.ok) {
-        throw new Error('Failed to fetch cart');
+    try {
+        const response = await fetch(`${API_BASE_URL}/cart`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch cart: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('Fetched Cart:', data); // Debug log
+        return data;
+    } catch (error) {
+        console.error('Error in fetchCart:', error.message);
+        throw error;
     }
-    return await response.json();
 };
 
-// Checkout
-export const checkout = async (data) => {
-    const response = await fetch(`${API_BASE_URL}/checkout`, {
-        method: 'POST',
+
+
+
+
+
+
+
+export const addToCartAPI = async (productId, quantity) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/cart`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('token')}`, // Ensure token is sent
+            },
+            body: JSON.stringify({ product_id: productId, quantity }),
+        });
+
+        if (!response.ok) {
+            const errorDetails = await response.json();
+            console.error('Error Details:', errorDetails);
+            throw new Error(`Failed to add to cart: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('Add to Cart Response:', data);
+        return data;
+    } catch (error) {
+        console.error('Error in addToCartAPI:', error.message);
+        throw error;
+    }
+};
+
+
+
+export const updateCartAPI = async (cartItemId, quantity) => {
+    const response = await fetch(`${API_BASE_URL}/cart/${cartItemId}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ quantity }),
     });
-
-    if (!response.ok) {
-        throw new Error('Checkout failed');
-    }
-
+    if (!response.ok) throw new Error('Failed to update cart');
     return await response.json();
 };
+
+export const removeFromCartAPI = async (cartItemId) => {
+    const response = await fetch(`${API_BASE_URL}/cart/${cartItemId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    if (!response.ok) throw new Error('Failed to remove from cart');
+    return await response.json();
+};
+

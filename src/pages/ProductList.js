@@ -17,7 +17,10 @@ const ProductList = () => {
     const navigate = useNavigate();
 
     const { cart } = useCart(); // Access cart from context
-    const cartCount = cart.reduce((count, item) => count + item.quantity, 0); // Calculate total cart items
+
+    // Safely handle cart, ensuring it is always treated as an array
+    const validCart = Array.isArray(cart) ? cart : [];
+    const cartCount = validCart.reduce((count, item) => count + (item.quantity || 0), 0);
 
     // Fetch products when component mounts
     useEffect(() => {
@@ -35,7 +38,7 @@ const ProductList = () => {
 
     // Filter and sort products based on search term, category, price, and stock
     useEffect(() => {
-        let filtered = products.filter(product =>
+        let filtered = products.filter((product) =>
             product.description.toLowerCase().includes(searchTerm.toLowerCase()) &&
             (selectedCategory ? product.category === selectedCategory : true)
         );
@@ -88,16 +91,33 @@ const ProductList = () => {
     };
 
     return (
-        <Container className="mt-4">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h1>Shop Our Products</h1>
-                <div>
-                    <Button variant="success" className="me-3" onClick={() => navigate('/cart')}>
-                        Cart {cartCount > 0 && `(${cartCount})`}
-                    </Button>
-                    <Button variant="danger" onClick={handleLogout}>Logout</Button>
-                </div>
-            </div>
+<Container className="mt-4">
+    <div className="d-flex justify-content-between align-items-center mb-4">
+        <h1>Shop Our Products</h1>
+        <div>
+            {/* Cart Button with Count */}
+            <Button
+                variant="success"
+                className="me-3 position-relative"
+                onClick={() => navigate('/cart')}
+            >
+                Cart
+                {cartCount > 0 && (
+                    <span
+                        className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                        style={{ fontSize: '0.75rem' }}
+                    >
+                        {cartCount}
+                    </span>
+                )}
+            </Button>
+
+            {/* Logout Button */}
+            <Button variant="danger" onClick={handleLogout}>
+                Logout
+            </Button>
+        </div>
+    </div>
 
             {/* Searchbar */}
             <Searchbar onSearch={handleSearch} />
