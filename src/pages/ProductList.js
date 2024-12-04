@@ -81,43 +81,50 @@ const ProductList = () => {
     };
 
     // Handle Logout
-    const handleLogout = () => {
-        // Clear authentication-related data
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
+// Handle Logout
+const handleLogout = () => {
+    // Clear authentication-related data
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
 
-        // Redirect to login page
-        navigate('/login');
-    };
+    // Refresh the page, then navigate to login after 2 seconds
+    setTimeout(() => {
+        window.location.reload(); // Refresh the page
+        setTimeout(() => {
+            navigate('/login', { replace: true }); // Redirect to login page
+        }, 100); // Add a short delay after refresh to ensure smooth navigation
+    }, 2000);
+};
+
 
     return (
-<Container className="mt-4">
-    <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1>Shop Our Products</h1>
-        <div>
-            {/* Cart Button with Count */}
-            <Button
-                variant="success"
-                className="me-3 position-relative"
-                onClick={() => navigate('/cart')}
-            >
-                Cart
-                {cartCount > 0 && (
-                    <span
-                        className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                        style={{ fontSize: '0.75rem' }}
+        <Container className="mt-4">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h1>Shop Our Products</h1>
+                <div>
+                    {/* Cart Button with Count */}
+                    <Button
+                        variant="success"
+                        className="me-3 position-relative"
+                        onClick={() => navigate('/cart')}
                     >
-                        {cartCount}
-                    </span>
-                )}
-            </Button>
+                        Cart
+                        {cartCount > 0 && (
+                            <span
+                                className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                style={{ fontSize: '0.75rem' }}
+                            >
+                                {cartCount}
+                            </span>
+                        )}
+                    </Button>
 
-            {/* Logout Button */}
-            <Button variant="danger" onClick={handleLogout}>
-                Logout
-            </Button>
-        </div>
-    </div>
+                    {/* Logout Button */}
+                    <Button variant="danger" onClick={handleLogout}>
+                        Logout
+                    </Button>
+                </div>
+            </div>
 
             {/* Searchbar */}
             <Searchbar onSearch={handleSearch} />
