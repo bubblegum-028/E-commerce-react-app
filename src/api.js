@@ -106,12 +106,6 @@ export const fetchCart = async () => {
 };
 
 
-
-
-
-
-
-
 export const addToCartAPI = async (productId, quantity) => {
     try {
         const response = await fetch(`${API_BASE_URL}/cart`, {
@@ -158,4 +152,31 @@ export const removeFromCartAPI = async (cartItemId) => {
     if (!response.ok) throw new Error('Failed to remove from cart');
     return await response.json();
 };
+
+// src/api.js
+export const clearCartAPI = async () => {
+    const API_BASE_URL = 'http://localhost:8000/api'; // Update to match your backend base URL
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/cart`, {
+            method: 'DELETE', // Use DELETE instead of POST
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('token')}`, // Include token if authentication is used
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Clear cart error:', errorData);
+            throw new Error(errorData.message || 'Failed to clear cart.');
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('ClearCartAPI Exception:', error);
+        throw error;
+    }
+};
+
 

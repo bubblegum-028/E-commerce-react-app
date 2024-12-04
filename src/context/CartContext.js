@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { fetchCart, addToCartAPI, updateCartAPI, removeFromCartAPI } from '../api'; // Import API methods
+import { clearCartAPI } from '../api'; // Adjust path as needed
 
 const CartContext = createContext();
 
@@ -88,18 +89,22 @@ export const CartProvider = ({ children, products, setProducts }) => {
     };
 
     // Clear cart
-    const clearCart = async () => {
-        try {
-            setLoading(true);
-            // Clear cart state
-            setCart([]);
-        } catch (err) {
-            console.error('Failed to clear cart:', err.message || err);
-            setError('Unable to clear the cart.');
-        } finally {
-            setLoading(false);
-        }
-    };
+// Clear cart
+const clearCart = async () => {
+    try {
+        setLoading(true);
+        await clearCartAPI(); // Clear the cart from the backend
+        setCart([]); // Clear cart state locally
+    } catch (err) {
+        console.error('Failed to clear cart:', err.message || err);
+        setError('Unable to clear the cart.');
+    } finally {
+        setLoading(false);
+    }
+};
+
+
+
 
     return (
         <CartContext.Provider
