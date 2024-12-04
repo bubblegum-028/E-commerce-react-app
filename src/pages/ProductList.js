@@ -81,21 +81,19 @@ const ProductList = () => {
     };
 
     // Handle Logout
-// Handle Logout
-const handleLogout = () => {
-    // Clear authentication-related data
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
+    const handleLogout = () => {
+        // Clear authentication-related data
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
 
-    // Refresh the page, then navigate to login after 2 seconds
-    setTimeout(() => {
-        window.location.reload(); // Refresh the page
+        // Refresh the page, then navigate to login after 2 seconds
         setTimeout(() => {
-            navigate('/login', { replace: true }); // Redirect to login page
-        }, 100); // Add a short delay after refresh to ensure smooth navigation
-    }, 2000);
-};
-
+            window.location.reload(); // Refresh the page
+            setTimeout(() => {
+                navigate('/login', { replace: true }); // Redirect to login page
+            }, 100); // Add a short delay after refresh to ensure smooth navigation
+        }, 2000);
+    };
 
     return (
         <Container className="mt-4">
