@@ -141,12 +141,13 @@ const Dashboard = () => {
         setEditingProductId(null);
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         // Remove token and role from localStorage
         localStorage.removeItem('token');
         localStorage.removeItem('role');
         // Redirect to login page
-        navigate('/login');
+        await navigate('/login');
+        window.location.reload();
     };
 
     return (
