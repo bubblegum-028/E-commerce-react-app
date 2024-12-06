@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import ProductCard from '../components/ProductCard'; // Import ProductCard
 import Searchbar from '../components/Searchbar'; // Import Searchbar
 import { fetchProducts } from '../api';
 import { useCart } from '../context/CartContext'; // Import the cart context
-import { MdOutlineShoppingCart } from "react-icons/md";
+import { MdOutlineShoppingCart } from 'react-icons/md';
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
@@ -15,7 +15,7 @@ const ProductList = () => {
     const [sortPrice, setSortPrice] = useState('');
     const [sortStock, setSortStock] = useState('');
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(true);  // Added loading state
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     const { cart } = useCart(); // Access cart from context
@@ -27,11 +27,11 @@ const ProductList = () => {
             try {
                 const productsData = await fetchProducts();
                 setProducts(productsData);
-                setFilteredProducts(productsData); // Initialize filtered products
-                setLoading(false);  // Set loading to false after fetching
+                setFilteredProducts(productsData);
+                setLoading(false);
             } catch (error) {
                 setError(error.message);
-                setLoading(false);  // Set loading to false on error
+                setLoading(false);
             }
         };
         loadProducts();
@@ -58,44 +58,40 @@ const ProductList = () => {
         setFilteredProducts(filtered);
     }, [searchTerm, selectedCategory, sortPrice, sortStock, products]);
 
-    const handleSearch = (term) => {
-        setSearchTerm(term);
-    };
+    const handleSearch = (term) => setSearchTerm(term);
 
-    const handleCategoryChange = (e) => {
-        setSelectedCategory(e.target.value);
-    };
+    const handleCategoryChange = (e) => setSelectedCategory(e.target.value);
 
-    const handleSortPriceChange = (e) => {
-        setSortPrice(e.target.value);
-    };
+    const handleSortPriceChange = (e) => setSortPrice(e.target.value);
 
-    const handleSortStockChange = (e) => {
-        setSortStock(e.target.value);
-    };
+    const handleSortStockChange = (e) => setSortStock(e.target.value);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         localStorage.removeItem('token');
         localStorage.removeItem('role');
-        navigate('/login');
+        localStorage.removeItem('user');
+        await navigate('/login');
+        window.location.reload();
     };
+
+    useEffect(() => {
+        console.log('Cart:', validCart);
+        console.log('Cart Count:', cartCount);
+    }, [cart]);
 
     return (
         <Container className="mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h1>Shop Our Products</h1>
-                <div className="d-flex align-items-center"> {/* Using d-flex to place buttons side by side */}
+                <div className="d-flex align-items-center">
                     <Button
                         variant="success"
-                        className="me-3 position-relative"
+                        className="me-3 d-flex align-items-center"
                         onClick={() => navigate('/cart')}
                     >
                         <MdOutlineShoppingCart style={{ fontSize: '1.5rem' }} />
                         {cartCount > 0 && (
-                            <span
-                                className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                style={{ fontSize: '0.75rem' }}
-                            >
+                            <span className="ms-2" style={{ fontSize: '1rem', fontWeight: 'bold' }}>
                                 {cartCount}
                             </span>
                         )}
