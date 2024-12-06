@@ -6,9 +6,9 @@ import { Container, Row, Col, Card, Button, Spinner, Alert } from 'react-bootstr
 const CartPage = () => {
     const { cart, updateQuantity, removeFromCart, loading, error } = useCart();
     const navigate = useNavigate(); // Initialize navigate
-
+    console.log('cart', cart);
     // Calculate grand total
-    const grandTotal = cart.reduce(
+    const grandTotal = cart?.data?.reduce(
         (total, item) => total + parseFloat(item.price || 0) * (item.quantity || 0),
         0
     );
@@ -27,7 +27,7 @@ const CartPage = () => {
             <h1 className="mb-4 text-center">Your Shopping Cart</h1>
             {error && <Alert variant="danger">{error}</Alert>}
 
-            {cart.length === 0 ? (
+            {cart?.data?.length === 0 ? (
                 <div className="text-center">
                     <h4>Your cart is empty!</h4>
                     <Button variant="primary" href="/products" className="mt-3">
@@ -37,21 +37,21 @@ const CartPage = () => {
             ) : (
                 <>
                     <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-                        {cart.map((item) => (
+                        {cart?.data?.map((item) => (
                             <Col key={item.id}>
                                 <Card className="h-100">
                                     <Card.Body>
                                         <Card.Title>{item.product.description}</Card.Title>
                                         <Card.Text>
-                                            <strong>Category:</strong> {item.product.category} <br />
-                                            <strong>Price:</strong> ${parseFloat(item.product.price).toFixed(2)} <br />
-                                            <strong>Quantity:</strong> {item.quantity} <br />
+                                            <strong>Category:</strong> {item?.product?.category} <br />
+                                            <strong>Price:</strong> ${parseFloat(item?.product?.price).toFixed(2)} <br />
+                                            <strong>Quantity:</strong> {item?.quantity} <br />
                                             <strong>Total:</strong> $
-                                            {(parseFloat(item.price) * item.quantity).toFixed(2)}
+                                            {(parseFloat(item?.price) * item?.quantity).toFixed(2)}
                                         </Card.Text>
                                         <Button
                                             variant="danger"
-                                            onClick={() => removeFromCart(item.id)}
+                                            onClick={() => removeFromCart(item?.id)}
                                             className="me-2"
                                         >
                                             Remove
@@ -80,7 +80,7 @@ const CartPage = () => {
                         ))}
                     </Row>
                     <div className="text-end mt-4">
-                        <h4>Grand Total: ${grandTotal.toFixed(2)}</h4>
+                        <h4>Grand Total: ${grandTotal?.toFixed(2)}</h4>
                         <Button
                             variant="success"
                             className="mt-3"
