@@ -51,11 +51,11 @@ const App = () => {
         loadProducts();
     }, []);
 
-    const handleLogin = (userRole) => {
+    const handleLogin = (userRole, token) => {
         setIsLoggedIn(true);
         setRole(userRole);
         localStorage.setItem('role', userRole);
-        localStorage.setItem('token', 'dummyToken'); // Replace with actual token
+        localStorage.setItem('token', token); // Replace with actual token
         localStorage.removeItem('lastVisitedPath'); // Clear lastVisitedPath on login
     };
 

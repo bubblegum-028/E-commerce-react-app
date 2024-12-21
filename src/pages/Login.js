@@ -27,9 +27,10 @@ const Login = ({ onLogin }) => {
             // Store role and user information locally
             localStorage.setItem('role', data.role);
             localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('token', data.token)
       
             // Notify parent about login
-            onLogin(data.role);
+            onLogin(data.role, data.token);
       
             // Redirect based on role
             if (data.role === 'admin') {

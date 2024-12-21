@@ -137,7 +137,10 @@ export const addToCartAPI = async (productId, quantity) => {
 export const updateCartAPI = async (cartItemId, quantity) => {
     const response = await fetch(`${API_BASE_URL}/cart/${cartItemId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`, // Ensure token is sent
+        },
         body: JSON.stringify({ quantity }),
     });
     if (!response.ok) throw new Error('Failed to update cart');
@@ -147,7 +150,10 @@ export const updateCartAPI = async (cartItemId, quantity) => {
 export const removeFromCartAPI = async (cartItemId) => {
     const response = await fetch(`${API_BASE_URL}/cart/${cartItemId}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`, // Ensure token is sent
+        },
     });
     if (!response.ok) throw new Error('Failed to remove from cart');
     return await response.json();

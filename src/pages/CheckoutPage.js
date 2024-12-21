@@ -15,7 +15,7 @@ const CheckoutPage = () => {
     const [successMessage, setSuccessMessage] = useState('');
 
     // Calculate grand total
-    const grandTotal = cart.reduce(
+    const grandTotal = cart?.data?.reduce(
         (total, item) => total + parseFloat(item.price || 0) * (item.quantity || 0),
         0
     );
@@ -72,7 +72,7 @@ const CheckoutPage = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {cart.map((item) => (
+                                {cart?.data?.map((item) => (
                                     <tr key={item.id}>
                                         <td>{item.product.description}</td>
                                         <td>{item.quantity}</td>

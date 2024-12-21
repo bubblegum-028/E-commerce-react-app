@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Form, Button, Alert, Container, Card, Spinner } from 'react-bootstrap';
+import { Form, Button, Alert, Container, Card, Spinner, ProgressBar } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import '../App.css';
-
 
 const Register = () => {
     const [name, setName] = useState('');
@@ -14,23 +13,41 @@ const Register = () => {
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [loading, setLoading] = useState(false);
+    const [emailError, setEmailError] = useState('');
+    const [passwordStrength, setPasswordStrength] = useState(0);
     const navigate = useNavigate();
 
+    const validateEmail = (email) => {
+        const emailRegex = /^\S+@\S+\.\S+$/;
+        if (!emailRegex.test(email)) {
+            setEmailError('Invalid email address.');
+        } else {
+            setEmailError('');
+        }
+    };
+
+    const checkPasswordStrength = (password) => {
+        let strength = 0;
+        if (password.length >= 6) strength += 1;
+        if (/[A-Z]/.test(password)) strength += 1;
+        if (/[0-9]/.test(password)) strength += 1;
+        if (/[@$!%*?&#]/.test(password)) strength += 1;
+        setPasswordStrength(strength);
+    };
 
     const handleRegister = async (e) => {
         e.preventDefault();
         setError('');
         setSuccessMessage('');
         setLoading(true);
-   
-        // Client-side validation
+
         if (!name || !email || !password || !contact) {
             setError('All fields are required.');
             setLoading(false);
             return;
         }
-        if (!/^\S+@\S+\.\S+$/.test(email)) {
-            setError('Invalid email address.');
+        if (emailError) {
+            setError('Please fix email errors.');
             setLoading(false);
             return;
         }
@@ -44,41 +61,28 @@ const Register = () => {
             setLoading(false);
             return;
         }
-   
+
         try {
             const response = await fetch('http://localhost:8000/api/register', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name,
-                    email,
-                    password,
-                    contact_number: contact, // Updated to match the backend and database
-                    role,
-                }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password, contact_information: contact, role }),
             });
-   
+
             const data = await response.json();
-   
+
             if (response.ok) {
-                const roleMessage = role === 'admin' ? 'Admin registered successfully!' : 'User registered successfully!';
-                setSuccessMessage(roleMessage);
-   
+                setSuccessMessage(role === 'admin' ? 'Admin registered successfully!' : 'User registered successfully!');
                 setTimeout(() => navigate('/login'), 2000);
             } else {
-                setError(data.errors ? Object.values(data.errors).join(', ') : data.message || 'Registration failed.');
+                setError(data.errors ? Object.values(data.errors).join(', ') : 'Registration failed.');
             }
-        } catch (error) {
-            setError('An error occurred. Please try again later.');
+        } catch {
+            setError('An error occurred. Please try again.');
         } finally {
             setLoading(false);
         }
     };
-   
-   
-
 
     return (
         <div className="register-container">
@@ -100,18 +104,20 @@ const Register = () => {
                                 />
                             </Form.Group>
 
-
                             <Form.Group controlId="formBasicEmail" className="mt-3">
                                 <Form.Label>Email address</Form.Label>
                                 <Form.Control
                                     type="email"
                                     placeholder="Enter email"
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    onChange={(e) => {
+                                        setEmail(e.target.value);
+                                        validateEmail(e.target.value);
+                                    }}
                                     required
                                 />
+                                {emailError && <small className="text-danger">{emailError}</small>}
                             </Form.Group>
-
 
                             <Form.Group controlId="formBasicPassword" className="mt-3">
                                 <Form.Label>Password</Form.Label>
@@ -119,11 +125,15 @@ const Register = () => {
                                     type="password"
                                     placeholder="Password"
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) => {
+                                        setPassword(e.target.value);
+                                        checkPasswordStrength(e.target.value);
+                                    }}
                                     required
                                 />
+                                <ProgressBar now={(passwordStrength / 4) * 100} className="mt-2" />
+                                <small>Password strength: {['Weak', 'Fair', 'Good', 'Strong'][passwordStrength]}</small>
                             </Form.Group>
-
 
                             <Form.Group controlId="formBasicConfirmPassword" className="mt-3">
                                 <Form.Label>Confirm Password</Form.Label>
@@ -136,7 +146,6 @@ const Register = () => {
                                 />
                             </Form.Group>
 
-
                             <Form.Group controlId="formBasicContact" className="mt-3">
                                 <Form.Label>Contact Information</Form.Label>
                                 <Form.Control
@@ -148,27 +157,19 @@ const Register = () => {
                                 />
                             </Form.Group>
 
-
                             <Form.Group controlId="formBasicRole" className="mt-3">
                                 <Form.Label>Select Role</Form.Label>
-                                <Form.Control
-                                    as="select"
-                                    value={role}
-                                    onChange={(e) => setRole(e.target.value)}
-                                    required
-                                >
+                                <Form.Control as="select" value={role} onChange={(e) => setRole(e.target.value)} required>
                                     <option value="user">User</option>
                                     <option value="admin">Admin</option>
                                 </Form.Control>
                             </Form.Group>
-
 
                             {loading && (
                                 <div className="text-center mt-3">
                                     <Spinner animation="border" variant="primary" />
                                 </div>
                             )}
-
 
                             <Button variant="primary" type="submit" className="w-100 mt-4" disabled={loading}>
                                 Register
@@ -181,8 +182,4 @@ const Register = () => {
     );
 };
 
-
 export default Register;
-
-
-
